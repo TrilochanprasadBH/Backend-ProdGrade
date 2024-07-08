@@ -20,3 +20,5 @@ connectDB()
 .catch((err)=>{
     console.log('index.js msg -> connection to db failed',err);
 })
+
+//curly braces need explicit return, parenthesis doesnt  
