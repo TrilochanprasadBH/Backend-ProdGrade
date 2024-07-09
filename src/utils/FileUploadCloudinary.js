@@ -15,7 +15,9 @@ const uploadOnCloudinary = async (localFilePath) => {
         const response = await cloudinary.uploader.upload(localFilePath,{
             resource_type:'auto'
         })
-        console.log("file has been successfully uploaded to cloudinary", response.url);
+        // console.log("file has been successfully uploaded to cloudinary", response.url);
+       //post successful upload, the file is removed from our local server, ie now cloud uploaded files wont be seen in public/temp like earlier  
+        fs.unlinkSync(localFilePath);
         return response
 
     } catch (error) {

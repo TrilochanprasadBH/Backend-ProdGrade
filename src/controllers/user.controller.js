@@ -21,6 +21,7 @@ const registerUser  = asyncHandler(async(req,res)=>{
     // 9.  return res finally  
     
     //in postman body - raw, json details given , here i get them though req.body  
+    //if files + text are to be uploaded, then use form-data option in postman , enable content type
             const {fullname,username,email,password} = req.body    //1 
             
             // console.log("fullname", fullname, 'email: ',email); //2 
@@ -29,7 +30,7 @@ const registerUser  = asyncHandler(async(req,res)=>{
             }
 
             //3 
-            const existingUser  = User.findOne({
+            const existingUser  = await User.findOne({
                 $or: [{username},{email}]    //type $ explore other options in here $and , $nor etc, see syntax carefully  , this checks if any document with this email or username already exists
             })
            
@@ -39,7 +40,13 @@ const registerUser  = asyncHandler(async(req,res)=>{
 
             //4 
             const avatarLocalPath = req.files?.avatar[0]?.path;
-            const coverImageLocalPath = req.files?.coverImage[0]?.path; 
+            // const coverImageLocalPath = req.files?.coverImage[0]?.path;  ->this throws undefined when cover is not uploaded
+
+            let coverImageLocalPath; 
+
+            if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+                coverImageLocalPath = req.files.coverImage[0].path 
+            }
 
             if(!avatarLocalPath){
                 throw new ApiError(400,"Avatar file is required");
@@ -63,9 +70,9 @@ const registerUser  = asyncHandler(async(req,res)=>{
             username: username.toLowerCase()
           })
 
-          const createdUser  = User.findById(user._id).select(
+          const createdUser  = await User.findById(user._id).select(
             "-password -refreshToken"
-          );
+          )
           // .select() method weird syntax, takes keys that should not be there in response.herer we do not want to show password and refresh token 
 
           if(!createdUser){
@@ -73,7 +80,7 @@ const registerUser  = asyncHandler(async(req,res)=>{
           }
 
         // return res.status(201).json({createdUser, "new user created"}) this way can be written but we need to standardise response in our app  so use ApiResponse 
-
+        //   console.log('createduser', createdUser);
         return res.status(201).json(
             new ApiResponse(200,createdUser, "User Registered Successfully")
         );
