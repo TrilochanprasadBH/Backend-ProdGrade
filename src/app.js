@@ -29,7 +29,7 @@ app.use(cookieParser());
 
 
 
-//route declaration 
+//route declaration.
 
 app.use("/api/v1/users",userRouter);
 
